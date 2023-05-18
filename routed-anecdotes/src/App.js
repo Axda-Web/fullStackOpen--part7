@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Route, Routes, Link, useMatch } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Route, Routes, Link, useMatch, useNavigate } from 'react-router-dom'
 
 const Menu = () => {
   const padding = {
@@ -10,6 +10,29 @@ const Menu = () => {
       <Link to='/' style={padding}>anecdotes</Link>
       <Link to='/create' style={padding}>create new</Link>
       <Link to='/about' style={padding}>about</Link>
+    </div>
+  )
+}
+
+const Notification = ({ content, setNotification }) => {
+
+  useEffect(() => {
+    setTimeout(() => {
+      setNotification('')
+    }, 5000)
+  })
+
+  const style = {
+    border: '2px solid green',
+    padding: 10,
+    color: 'green',
+    width: '90%',
+    maxWidth: 500,
+    marginTop: 20
+  }
+  return (
+    <div style={style}>
+      {content}
     </div>
   )
 }
@@ -64,6 +87,8 @@ const CreateNew = (props) => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
+  const navigate = useNavigate()
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -73,6 +98,8 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    navigate('/')
+    props.setNotification(`Annecdote '${content}' added!`)
   }
 
   return (
@@ -116,7 +143,7 @@ const App = () => {
     }
   ])
 
-  // const [notification, setNotification] = useState('')
+  const [notification, setNotification] = useState('')
 
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
@@ -144,9 +171,10 @@ const App = () => {
     <div>
       <h1>Software anecdotes</h1>
       <Menu />
+        { notification && <Notification content={notification} setNotification={setNotification} /> }
         <Routes>
           <Route path='/anecdotes/:id' element={<Anecdote anecdote={anecdote} />} />
-          <Route path='/create' element={<CreateNew addNew={addNew} />} />
+          <Route path='/create' element={<CreateNew addNew={addNew} setNotification={setNotification} />} />
           <Route path='/about' element={<About />} />
           <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
         </Routes>
