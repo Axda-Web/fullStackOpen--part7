@@ -90,6 +90,12 @@ const CreateNew = (props) => {
 
   const navigate = useNavigate()
 
+  const resetFields = () => {
+    content.reset()
+    author.reset()
+    info.reset()
+  }
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -119,7 +125,14 @@ const CreateNew = (props) => {
           url for more info
           <input {...info} />
         </div>
-        <button>create</button>
+        <button type="submit">create</button>
+        <button
+          type="button"
+          onClick={resetFields}
+          style={{marginLeft: 10}}
+        >
+          reset
+        </button>
       </form>
     </div>
   )
