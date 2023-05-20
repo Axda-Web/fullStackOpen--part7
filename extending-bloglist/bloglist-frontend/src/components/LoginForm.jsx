@@ -17,14 +17,7 @@ const LoginForm = ({
     return (
         <>
             <h2>Log in to application</h2>
-            <Notification
-                message={errorMessage}
-                classes="notification notification--error"
-            />
-            <Notification
-                message={successMessage}
-                classes="notification notification--success"
-            />
+            <Notification />
             <form
                 onSubmit={handleLogin}
                 style={{

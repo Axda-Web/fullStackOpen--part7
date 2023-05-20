@@ -10,15 +10,17 @@ import NewBlogForm from './components/NewBlogForm';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
+import { useDispatch } from 'react-redux';
+import { setNotification } from './reducers/notificationReducer';
+
 const App = () => {
     const [blogs, setBlogs] = useState([]);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [successMessage, setSuccessMessage] = useState(null);
-    const [errorMessage, setErrorMessage] = useState(null);
     const [user, setUser] = useState(null);
 
     const newBlogFormRef = useRef();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -46,15 +48,19 @@ const App = () => {
             setUser(user);
             setUsername('');
             setPassword('');
-            setSuccessMessage('Your are logged in!');
-            setTimeout(() => {
-                setSuccessMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    { type: 'success', content: 'Your are logged in!' },
+                    5
+                )
+            );
         } catch (exception) {
-            setErrorMessage('Wrong username or password');
-            setTimeout(() => {
-                setErrorMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    { type: 'error', content: 'Wrong username or password' },
+                    5
+                )
+            );
         }
     };
 
@@ -71,17 +77,25 @@ const App = () => {
                 blogService.setToken(user.token)
             );
             setBlogs((prevState) => [...prevState, returnedBlog]);
-            setSuccessMessage(
-                `A new blog ${returnedBlog.title} by ${returnedBlog.author} added`
+            dispatch(
+                setNotification(
+                    {
+                        type: 'success',
+                        content: `A new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
+                    },
+                    5
+                )
             );
-            setTimeout(() => {
-                setSuccessMessage(null);
-            }, 5000);
         } catch (exception) {
-            setErrorMessage('Something went wrong... Try again');
-            setTimeout(() => {
-                setErrorMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'Something went wrong... Try again',
+                    },
+                    5
+                )
+            );
         }
     };
 
@@ -99,18 +113,28 @@ const App = () => {
                         : blog
                 );
                 setBlogs(updatedBlogs);
-                setSuccessMessage(`Blog ${returnedUpddatedBlog.title} updated`);
-                setTimeout(() => {
-                    setSuccessMessage(null);
-                }, 5000);
+                dispatch(
+                    setNotification(
+                        {
+                            type: 'success',
+                            content: `Blog ${returnedUpddatedBlog.title} updated`,
+                        },
+                        5
+                    )
+                );
             } else {
                 throw new Error();
             }
         } catch (exception) {
-            setErrorMessage('You are not authorized to update this item');
-            setTimeout(() => {
-                setErrorMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'You are not authorized to update this item',
+                    },
+                    5
+                )
+            );
         }
     };
 
@@ -131,15 +155,25 @@ const App = () => {
                 (blog) => blog.id !== blogToRemove.id
             );
             setBlogs(updatedBlogs);
-            setSuccessMessage(`Blog ${blogToRemove.title} deleted`);
-            setTimeout(() => {
-                setSuccessMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    {
+                        type: 'success',
+                        content: `Blog ${blogToRemove.title} deleted`,
+                    },
+                    5
+                )
+            );
         } catch (exception) {
-            setErrorMessage('Something went wrong... Try again');
-            setTimeout(() => {
-                setErrorMessage(null);
-            }, 5000);
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'Something went wrong... Try again',
+                    },
+                    5
+                )
+            );
         }
     };
 
@@ -152,20 +186,11 @@ const App = () => {
                     pasword={password}
                     setPassword={setPassword}
                     handleLogin={handleLogin}
-                    errorMessage={errorMessage}
-                    successMessage={successMessage}
                 />
             ) : (
                 <div>
                     <h2>blogs</h2>
-                    <Notification
-                        message={errorMessage}
-                        classes="notification notification--error"
-                    />
-                    <Notification
-                        message={successMessage}
-                        classes="notification notification--success"
-                    />
+                    <Notification />
                     <p>{user.username} logged in</p>
                     <button onClick={handleLogout}>Logout</button>
                     <Togglable
