@@ -5,12 +5,12 @@
     border-radius: 5px;
     padding: 10px;
     margin-bottom: 10px;
-  }
-  
-  .notification--success {
+}
+
+.notification--success {
     color: green;
-  }
-  
-  .notification--error {
+}
+
+.notification--error {
     color: red;
-  }
+}
