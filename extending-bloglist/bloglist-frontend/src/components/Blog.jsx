@@ -1,7 +1,16 @@
 import { useState } from 'react';
+import blogService from '../services/blogs';
 
-const Blog = ({ blog, handleBlogUpdate, handleBlogDelete, showRemoveBtn }) => {
+import { useDispatch, useSelector } from 'react-redux';
+import { setNotification } from '../reducers/notificationReducer';
+import { likeBlog, removeBlog } from '../reducers/blogReducer';
+import { selectUser } from '../reducers/loginReducer';
+
+const Blog = ({ blog, showRemoveBtn, setShowRemoveBtn }) => {
     const [showDetails, setShowDetails] = useState(false);
+
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
 
     const blogStyle = {
         paddingTop: 10,
@@ -11,12 +20,74 @@ const Blog = ({ blog, handleBlogUpdate, handleBlogDelete, showRemoveBtn }) => {
         marginBottom: 5,
     };
 
-    const handleLikeClick = () => {
+    const handleLikeClick = async () => {
         const updatedBlog = {
             ...blog,
             likes: blog.likes + 1,
         };
-        handleBlogUpdate(updatedBlog);
+
+        try {
+            dispatch(
+                likeBlog(
+                    updatedBlog.id,
+                    updatedBlog,
+                    blogService.setToken(user.token)
+                )
+            );
+            dispatch(
+                setNotification(
+                    {
+                        type: 'success',
+                        content: `Blog ${updatedBlog.title} updated`,
+                    },
+                    5
+                )
+            );
+        } catch (exception) {
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'You are not authorized to update this item',
+                    },
+                    5
+                )
+            );
+        }
+    };
+
+    const handleBlogDelete = async (blogToRemove) => {
+        if (
+            !window.confirm(
+                `Remove blog ${blogToRemove.title} by ${blogToRemove.author}`
+            )
+        ) {
+            return;
+        }
+        try {
+            dispatch(
+                removeBlog(blogToRemove.id, blogService.setToken(user.token))
+            );
+            dispatch(
+                setNotification(
+                    {
+                        type: 'success',
+                        content: `Blog ${blogToRemove.title} deleted`,
+                    },
+                    5
+                )
+            );
+        } catch (exception) {
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'Something went wrong... Try again',
+                    },
+                    5
+                )
+            );
+        }
     };
 
     return (
