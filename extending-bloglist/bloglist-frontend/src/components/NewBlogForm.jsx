@@ -1,27 +1,62 @@
 import { useState } from 'react';
+import blogService from '../services/blogs';
 
-const NewBlogForm = ({ handleSubmitNewBlog }) => {
-    const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
+import { useDispatch, useSelector } from 'react-redux';
+import { addBlog } from '../reducers/blogReducer';
+import { setNotification } from '../reducers/notificationReducer';
+import { selectUser } from '../reducers/loginReducer';
 
-    const handleInputChange = (e) => {
-        const { value, name } = e.target;
+const NewBlogForm = ({ toggleVisibility }) => {
+    const [newBlog, setNewBlog] = useState({
+        title: '',
+        author: '',
+        url: '',
+    });
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
         setNewBlog((prevState) => ({
             ...prevState,
             [name]: value,
         }));
     };
 
-    const addBlog = (event) => {
-        event.preventDefault();
-        handleSubmitNewBlog(newBlog);
-        setNewBlog({ title: '', author: '', url: '' });
+    const handleSubmitNewBlog = async (e) => {
+        e.preventDefault();
+
+        try {
+            dispatch(addBlog(newBlog, blogService.setToken(user.token)));
+            dispatch(
+                setNotification(
+                    {
+                        type: 'success',
+                        content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
+                    },
+                    5
+                )
+            );
+            setNewBlog({ title: '', author: '', url: '' });
+            toggleVisibility();
+        } catch (exception) {
+            dispatch(
+                setNotification(
+                    {
+                        type: 'error',
+                        content: 'Something went wrong... Try again',
+                    },
+                    5
+                )
+            );
+        }
     };
 
     return (
         <section>
             <h2>Create new</h2>
             <form
-                onSubmit={addBlog}
+                onSubmit={handleSubmitNewBlog}
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -39,8 +74,8 @@ const NewBlogForm = ({ handleSubmitNewBlog }) => {
                         name="title"
                         placeholder="title"
                         id="title"
+                        onChange={handleChange}
                         value={newBlog.title}
-                        onChange={handleInputChange}
                     />
                 </div>
                 <div>
@@ -52,8 +87,8 @@ const NewBlogForm = ({ handleSubmitNewBlog }) => {
                         name="author"
                         placeholder="author"
                         id="author"
+                        onChange={handleChange}
                         value={newBlog.author}
-                        onChange={handleInputChange}
                     />
                 </div>
                 <div>
@@ -65,8 +100,8 @@ const NewBlogForm = ({ handleSubmitNewBlog }) => {
                         name="url"
                         placeholder="url"
                         id="url"
+                        onChange={handleChange}
                         value={newBlog.url}
-                        onChange={handleInputChange}
                     />
                 </div>
                 <input type="submit" value="Create" />

@@ -1,17 +1,45 @@
+import { useState } from 'react';
 import Notification from './Notification';
 
-const LoginForm = ({
-    username,
-    setUsername,
-    password,
-    setPassword,
-    handleLogin,
-    errorMessage,
-    successMessage,
-}) => {
-    const handleInputChange = (e) => {
-        const { value, name } = e.target;
-        name === 'username' ? setUsername(value) : setPassword(value);
+import { useDispatch } from 'react-redux';
+import { login } from '../reducers/loginReducer';
+import { setNotification } from '../reducers/notificationReducer';
+
+const LoginForm = () => {
+    const [credentials, setCredentials] = useState({
+        username: '',
+        password: '',
+    });
+    const dispatch = useDispatch();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCredentials((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        try {
+            dispatch(login(credentials));
+            dispatch(
+                setNotification(
+                    { type: 'success', content: 'Your are logged in!' },
+                    5
+                )
+            );
+            setCredentials({ username: '', password: '' });
+        } catch (exception) {
+            dispatch(
+                setNotification(
+                    { type: 'error', content: 'Wrong username or password' },
+                    5
+                )
+            );
+        }
     };
 
     return (
@@ -31,15 +59,15 @@ const LoginForm = ({
                     type="text"
                     name="username"
                     id="username-input"
-                    value={username}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
+                    value={credentials.username}
                 />
                 <input
                     type="password"
                     name="password"
                     id="password-input"
-                    value={password}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
+                    value={credentials.password}
                 />
                 <input id="login-button" type="submit" value="Login" />
             </form>
