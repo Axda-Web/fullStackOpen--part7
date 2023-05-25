@@ -1,16 +1,38 @@
 import { useState } from 'react';
 import blogService from '../services/blogs';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { setNotification } from '../reducers/notificationReducer';
-import { likeBlog, removeBlog } from '../reducers/blogReducer';
-import { selectUser } from '../reducers/loginReducer';
+import { useNotificationDispatch } from '../NotificationContext';
+import { useUserValue } from '../UserContext';
 
-const Blog = ({ blog, showRemoveBtn, setShowRemoveBtn }) => {
+import { useQueryClient, useMutation } from 'react-query';
+
+const Blog = ({ blog, showRemoveBtn }) => {
     const [showDetails, setShowDetails] = useState(false);
 
-    const dispatch = useDispatch();
-    const user = useSelector(selectUser);
+    const dispatch = useNotificationDispatch();
+    const user = useUserValue();
+
+    const queryClient = useQueryClient();
+    const voteBlogMutation = useMutation(blogService.update, {
+        onSuccess: (updatedBlog) => {
+            const blogs = queryClient.getQueryData('blogs');
+            queryClient.setQueryData(
+                'blogs',
+                blogs.map((blog) =>
+                    blog.id === updatedBlog.id ? updatedBlog : blog
+                )
+            );
+        },
+    });
+    const deleteBlogMutation = useMutation(blogService.remove, {
+        onSuccess: (blogToDelete) => {
+            const blogs = queryClient.getQueryData('blogs');
+            queryClient.setQueryData(
+                'blogs',
+                blogs.filter((blog) => blog.id !== blogToDelete.id)
+            );
+        },
+    });
 
     const blogStyle = {
         paddingTop: 10,
@@ -27,32 +49,20 @@ const Blog = ({ blog, showRemoveBtn, setShowRemoveBtn }) => {
         };
 
         try {
-            dispatch(
-                likeBlog(
-                    updatedBlog.id,
-                    updatedBlog,
-                    blogService.setToken(user.token)
-                )
-            );
-            dispatch(
-                setNotification(
-                    {
-                        type: 'success',
-                        content: `Blog ${updatedBlog.title} updated`,
-                    },
-                    5
-                )
-            );
+            voteBlogMutation.mutate({
+                id: updatedBlog.id,
+                blog: updatedBlog,
+                token: user.token,
+            });
+            dispatch({
+                type: 'ADD',
+                payload: `Blog ${updatedBlog.title} updated`,
+            });
         } catch (exception) {
-            dispatch(
-                setNotification(
-                    {
-                        type: 'error',
-                        content: 'You are not authorized to update this item',
-                    },
-                    5
-                )
-            );
+            dispatch({
+                type: 'ADD',
+                payload: 'You are not authorized to update this item',
+            });
         }
     };
 
@@ -65,28 +75,19 @@ const Blog = ({ blog, showRemoveBtn, setShowRemoveBtn }) => {
             return;
         }
         try {
-            dispatch(
-                removeBlog(blogToRemove.id, blogService.setToken(user.token))
-            );
-            dispatch(
-                setNotification(
-                    {
-                        type: 'success',
-                        content: `Blog ${blogToRemove.title} deleted`,
-                    },
-                    5
-                )
-            );
+            deleteBlogMutation.mutate({
+                id: blogToRemove.id,
+                token: user.token,
+            });
+            dispatch({
+                type: 'ADD',
+                payload: `Blog ${blogToRemove.title} deleted`,
+            });
         } catch (exception) {
-            dispatch(
-                setNotification(
-                    {
-                        type: 'error',
-                        content: 'Something went wrong... Try again',
-                    },
-                    5
-                )
-            );
+            dispatch({
+                type: 'ADD',
+                payload: 'Something went wrong... Try again',
+            });
         }
     };
 

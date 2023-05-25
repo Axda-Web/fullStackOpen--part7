@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import blogService from '../services/blogs';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { addBlog } from '../reducers/blogReducer';
-import { setNotification } from '../reducers/notificationReducer';
-import { selectUser } from '../reducers/loginReducer';
+import { useQueryClient, useMutation } from 'react-query';
+import { useUserValue } from '../UserContext';
+import { useNotificationDispatch } from '../NotificationContext';
 
 const NewBlogForm = ({ toggleVisibility }) => {
     const [newBlog, setNewBlog] = useState({
@@ -12,8 +11,17 @@ const NewBlogForm = ({ toggleVisibility }) => {
         author: '',
         url: '',
     });
-    const dispatch = useDispatch();
-    const user = useSelector(selectUser);
+
+    const user = useUserValue();
+    const dispatch = useNotificationDispatch();
+
+    const queryClient = useQueryClient();
+    const addBlogMutation = useMutation(blogService.create, {
+        onSuccess: (newBlog) => {
+            const blogs = queryClient.getQueryData('blogs');
+            queryClient.setQueryData('blogs', blogs.concat(newBlog));
+        },
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,28 +35,18 @@ const NewBlogForm = ({ toggleVisibility }) => {
         e.preventDefault();
 
         try {
-            dispatch(addBlog(newBlog, blogService.setToken(user.token)));
-            dispatch(
-                setNotification(
-                    {
-                        type: 'success',
-                        content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
-                    },
-                    5
-                )
-            );
+            addBlogMutation.mutate({ blog: newBlog, token: user.token });
+            dispatch({
+                type: 'ADD',
+                payload: `A new blog ${newBlog.title} by ${newBlog.author} added`,
+            });
             setNewBlog({ title: '', author: '', url: '' });
             toggleVisibility();
         } catch (exception) {
-            dispatch(
-                setNotification(
-                    {
-                        type: 'error',
-                        content: 'Something went wrong... Try again',
-                    },
-                    5
-                )
-            );
+            dispatch({
+                type: 'ADD',
+                payload: 'Something went wrong... Try again',
+            });
         }
     };
 
