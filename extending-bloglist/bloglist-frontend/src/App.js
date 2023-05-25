@@ -6,6 +6,7 @@ import LoginForm from './components/LoginForm';
 import NewBlogForm from './components/NewBlogForm';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
+import Users from './components/Users';
 
 import { useUserValue, useUserDispatch } from './UserContext';
 
@@ -27,10 +28,7 @@ const App = () => {
     };
 
     const toggleVisibility = () => {
-        newBlogFormRef.current.toggleVisibility({
-            type: 'SET_USER',
-            payload: null,
-        });
+        newBlogFormRef.current.toggleVisibility();
     };
 
     if (!user) return <LoginForm />;
@@ -45,6 +43,7 @@ const App = () => {
                 <NewBlogForm toggleVisibility={toggleVisibility} />
             </Togglable>
             <BlogList user={user} />
+            <Users />
         </div>
     );
 };
