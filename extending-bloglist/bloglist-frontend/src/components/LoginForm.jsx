@@ -1,16 +1,32 @@
 import { useState } from 'react';
 import Notification from './Notification';
 
-import { useDispatch } from 'react-redux';
-import { login } from '../reducers/loginReducer';
-import { setNotification } from '../reducers/notificationReducer';
+import { useMutation, useQueryClient } from 'react-query';
+import loginService from '../services/login';
+
+import { useNotificationDispatch } from '../NotificationContext';
+import { useUserDispatch } from '../UserContext';
 
 const LoginForm = () => {
     const [credentials, setCredentials] = useState({
         username: '',
         password: '',
     });
-    const dispatch = useDispatch();
+
+    const notificationDispatch = useNotificationDispatch();
+    const userDispatch = useUserDispatch();
+
+    const queryClient = useQueryClient();
+    const loginMutation = useMutation(loginService.login, {
+        onSuccess: (newUser) => {
+            queryClient.invalidateQueries(['user', 'blogs']);
+            userDispatch({ type: 'SET_USER', payload: newUser });
+            window.localStorage.setItem(
+                'loggedBlogappUser',
+                JSON.stringify(newUser)
+            );
+        },
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,21 +40,17 @@ const LoginForm = () => {
         e.preventDefault();
 
         try {
-            dispatch(login(credentials));
-            dispatch(
-                setNotification(
-                    { type: 'success', content: 'Your are logged in!' },
-                    5
-                )
-            );
+            loginMutation.mutate(credentials);
+            notificationDispatch({
+                type: 'ADD',
+                payload: 'Your are logged in!',
+            });
             setCredentials({ username: '', password: '' });
         } catch (exception) {
-            dispatch(
-                setNotification(
-                    { type: 'error', content: 'Wrong username or password' },
-                    5
-                )
-            );
+            notificationDispatch({
+                type: 'ADD',
+                payload: 'Wrong username or password',
+            });
         }
     };
 

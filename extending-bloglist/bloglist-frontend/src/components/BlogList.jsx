@@ -1,9 +1,22 @@
-import { useSelector } from 'react-redux';
-import { selectBlogs } from '../reducers/blogReducer';
 import Blog from './Blog';
 
+import { useQuery } from 'react-query';
+import blogService from '../services/blogs';
+
 const BlogList = ({ user }) => {
-    const blogs = useSelector(selectBlogs);
+    const {
+        data: blogs,
+        isLoading,
+        isError,
+    } = useQuery('blogs', () => blogService.getAll());
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (isError) {
+        return <div>Error</div>;
+    }
 
     return (
         <div>
