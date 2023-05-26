@@ -1,17 +1,21 @@
 import { useState } from 'react';
-import Notification from './Notification';
+import Notification from '../../components/Notification';
 
 import { useMutation, useQueryClient } from 'react-query';
-import loginService from '../services/login';
+import loginService from '../../services/login';
 
-import { useNotificationDispatch } from '../NotificationContext';
-import { useUserDispatch } from '../UserContext';
+import { useNotificationDispatch } from '../../NotificationContext';
+import { useUserDispatch } from '../../UserContext';
+
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
     const [credentials, setCredentials] = useState({
         username: '',
         password: '',
     });
+
+    const navigate = useNavigate();
 
     const notificationDispatch = useNotificationDispatch();
     const userDispatch = useUserDispatch();
@@ -25,6 +29,22 @@ const LoginForm = () => {
                 'loggedBlogappUser',
                 JSON.stringify(newUser)
             );
+            notificationDispatch({
+                type: 'ADD',
+                payload: 'Your are logged in!',
+            });
+            setCredentials({ username: '', password: '' });
+            navigate('/');
+        },
+        onError: (error) => {
+            console.log(
+                '🚀 ~ file: LoginForm.jsx:46 ~ LoginForm ~ error:',
+                error
+            );
+            notificationDispatch({
+                type: 'ADD',
+                payload: 'Wrong username or password',
+            });
         },
     });
 
@@ -38,20 +58,7 @@ const LoginForm = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
-        try {
-            loginMutation.mutate(credentials);
-            notificationDispatch({
-                type: 'ADD',
-                payload: 'Your are logged in!',
-            });
-            setCredentials({ username: '', password: '' });
-        } catch (exception) {
-            notificationDispatch({
-                type: 'ADD',
-                payload: 'Wrong username or password',
-            });
-        }
+        loginMutation.mutate(credentials);
     };
 
     return (
