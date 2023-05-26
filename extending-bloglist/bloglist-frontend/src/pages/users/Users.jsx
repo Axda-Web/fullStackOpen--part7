@@ -1,6 +1,5 @@
 import { useQuery } from 'react-query';
 import userService from '../../services/users';
-
 import { Link } from 'react-router-dom';
 
 const Users = () => {

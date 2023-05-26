@@ -1,12 +1,18 @@
+import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useUserValue } from '../UserContext';
+import { useUserValue, useUserDispatch } from '../UserContext';
 
 const ProtectedRoute = ({ children }) => {
     let user = useUserValue();
+    const userDispatch = useUserDispatch();
 
-    if (localStorage.getItem('loggedBlogappUser')) {
-        user = localStorage.getItem('loggedBlogappUser');
-    }
+    const persistedUser = JSON.parse(localStorage.getItem('loggedBlogappUser'));
+
+    useEffect(() => {
+        if (!user && persistedUser) {
+            userDispatch({ type: 'SET_USER', payload: persistedUser });
+        }
+    }, [persistedUser]);
 
     if (!user) return <Navigate to="/login" replace={true} />;
 

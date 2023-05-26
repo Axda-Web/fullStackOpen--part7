@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import Notification from '../../components/Notification';
-
-import { useMutation, useQueryClient } from 'react-query';
 import loginService from '../../services/login';
-
 import { useNotificationDispatch } from '../../NotificationContext';
 import { useUserDispatch } from '../../UserContext';
-
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
@@ -20,10 +16,18 @@ const LoginForm = () => {
     const notificationDispatch = useNotificationDispatch();
     const userDispatch = useUserDispatch();
 
-    const queryClient = useQueryClient();
-    const loginMutation = useMutation(loginService.login, {
-        onSuccess: (newUser) => {
-            queryClient.invalidateQueries(['user', 'blogs']);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCredentials((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const newUser = await loginService.login(credentials);
             userDispatch({ type: 'SET_USER', payload: newUser });
             window.localStorage.setItem(
                 'loggedBlogappUser',
@@ -35,30 +39,16 @@ const LoginForm = () => {
             });
             setCredentials({ username: '', password: '' });
             navigate('/');
-        },
-        onError: (error) => {
+        } catch (exception) {
             console.log(
-                '🚀 ~ file: LoginForm.jsx:46 ~ LoginForm ~ error:',
-                error
+                '🚀 ~ file: LoginForm.jsx:72 ~ handleLogin ~ exception:',
+                exception
             );
             notificationDispatch({
                 type: 'ADD',
                 payload: 'Wrong username or password',
             });
-        },
-    });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCredentials((prevState) => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        loginMutation.mutate(credentials);
+        }
     };
 
     return (

@@ -17,7 +17,7 @@ const create = async ({ blog, token }) => {
     return response.data;
 };
 
-const update = async ({ id, blog, token }) => {
+const updateLikes = async ({ id, blog, token }) => {
     const config = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -25,6 +25,22 @@ const update = async ({ id, blog, token }) => {
     };
 
     const response = await axios.put(`${baseUrl}/${id}`, blog, config);
+
+    return response.data;
+};
+
+const addComment = async ({ id, blog, token }) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+
+    const response = await axios.post(
+        `${baseUrl}/${id}/comments`,
+        blog,
+        config
+    );
 
     return response.data;
 };
@@ -42,4 +58,4 @@ const remove = async ({ id, token }) => {
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default { getAll, create, update, remove };
+export default { getAll, create, updateLikes, addComment, remove };
