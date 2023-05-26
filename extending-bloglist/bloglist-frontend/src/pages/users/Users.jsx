@@ -1,12 +1,16 @@
 import { useQuery } from 'react-query';
-import userService from '../services/users';
+import userService from '../../services/users';
+
+import { Link } from 'react-router-dom';
 
 const Users = () => {
     const {
         data: users,
         isLoading,
         isError,
-    } = useQuery('users', () => userService.getAll());
+    } = useQuery('users', userService.getAll, {
+        refetchOnWindowFocus: false,
+    });
 
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>Error</div>;
@@ -24,7 +28,11 @@ const Users = () => {
                 <tbody>
                     {users.map((user) => (
                         <tr key={user.id}>
-                            <td>{user.name}</td>
+                            <td>
+                                <Link to={`/users/${user.id}`}>
+                                    {user.name}
+                                </Link>
+                            </td>
                             <td>{user.blogs.length}</td>
                         </tr>
                     ))}
