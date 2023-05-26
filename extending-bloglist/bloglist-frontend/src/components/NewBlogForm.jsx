@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import blogService from '../services/blogs';
-
 import { useQueryClient, useMutation } from 'react-query';
 import { useUserValue } from '../UserContext';
 import { useNotificationDispatch } from '../NotificationContext';
@@ -13,7 +12,7 @@ const NewBlogForm = ({ toggleVisibility }) => {
     });
 
     const user = useUserValue();
-    const dispatch = useNotificationDispatch();
+    const notificationDispatch = useNotificationDispatch();
 
     const queryClient = useQueryClient();
     const addBlogMutation = useMutation(blogService.create, {
@@ -36,14 +35,14 @@ const NewBlogForm = ({ toggleVisibility }) => {
 
         try {
             addBlogMutation.mutate({ blog: newBlog, token: user.token });
-            dispatch({
+            notificationDispatch({
                 type: 'ADD',
                 payload: `A new blog ${newBlog.title} by ${newBlog.author} added`,
             });
             setNewBlog({ title: '', author: '', url: '' });
             toggleVisibility();
         } catch (exception) {
-            dispatch({
+            notificationDispatch({
                 type: 'ADD',
                 payload: 'Something went wrong... Try again',
             });

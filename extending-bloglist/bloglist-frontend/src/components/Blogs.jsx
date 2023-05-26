@@ -1,9 +1,7 @@
 import { useRef } from 'react';
 import { useQuery } from 'react-query';
 import blogService from '../services/blogs';
-
 import { Link } from 'react-router-dom';
-
 import Togglable from './Togglable';
 import NewBlogForm from './NewBlogForm';
 

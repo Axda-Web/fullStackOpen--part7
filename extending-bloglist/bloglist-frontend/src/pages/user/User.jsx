@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import userService from '../../services/users';
-
 import { Link } from 'react-router-dom';
 
 const User = () => {
@@ -27,7 +26,7 @@ const User = () => {
             <ul>
                 {blogs.map((blog) => (
                     <li key={blog.id}>
-                        <Link to={blog.url}>{blog.title}</Link>
+                        <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
                     </li>
                 ))}
             </ul>

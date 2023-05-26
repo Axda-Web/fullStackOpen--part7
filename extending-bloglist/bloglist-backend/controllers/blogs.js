@@ -60,12 +60,10 @@ router.put('/:id', userExtractor, async (request, response) => {
         );
         response.json(updatedBlog);
     } else {
-        return response
-            .status(401)
-            .json({
-                error: 'Not allowed',
-                message: 'You are not authorized to update this item',
-            });
+        return response.status(401).json({
+            error: 'Not allowed',
+            message: 'You are not authorized to update this item',
+        });
     }
 });
 
@@ -84,6 +82,29 @@ router.delete('/:id', userExtractor, async (request, response) => {
     await blog.remove();
 
     response.status(204).end();
+});
+
+router.post('/:id/comments', userExtractor, async (request, response) => {
+    const body = request.body;
+    const user = request.user;
+
+    const blog = {
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes || 0,
+        comments: body.comments || [],
+    };
+
+    if (!user) {
+        return response.status(401).json({ error: 'operation not permitted' });
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
+        new: true,
+    });
+
+    response.json(updatedBlog);
 });
 
 module.exports = router;

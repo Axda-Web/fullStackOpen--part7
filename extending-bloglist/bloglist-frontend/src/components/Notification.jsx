@@ -5,11 +5,11 @@ import {
 } from '../NotificationContext';
 
 const Notification = () => {
-    const dispatch = useNotificationDispatch();
+    const notificationDispatch = useNotificationDispatch();
 
     useEffect(() => {
         setTimeout(() => {
-            dispatch({
+            notificationDispatch({
                 type: 'REMOVE',
             });
         }, 5000);
