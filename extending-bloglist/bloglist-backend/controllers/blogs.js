@@ -88,6 +88,11 @@ router.post('/:id/comments', userExtractor, async (request, response) => {
     const body = request.body;
     const user = request.user;
 
+    const comment = body.comments[body.comments.length - 1];
+    if (!comment || comment.length === 0) {
+        return response.status(400).json({ error: `Comment can't be empty` });
+    }
+
     const blog = {
         title: body.title,
         author: body.author,

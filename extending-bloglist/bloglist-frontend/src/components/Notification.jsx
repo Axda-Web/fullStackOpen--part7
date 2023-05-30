@@ -4,6 +4,8 @@ import {
     useNotificationDispatch,
 } from '../NotificationContext';
 
+import Alert from '@mui/material/Alert';
+
 const Notification = () => {
     const notificationDispatch = useNotificationDispatch();
 
@@ -15,18 +17,13 @@ const Notification = () => {
         }, 5000);
     });
 
-    const style = {
-        border: 'solid',
-        padding: 10,
-        borderWidth: 1,
-        marginBottom: 5,
-    };
-
     const notification = useNotificationValue();
 
-    if (!notification) return null;
+    if (!notification.content) return null;
 
-    return <div style={style}>{notification}</div>;
+    return (
+        <Alert severity={notification.severity}>{notification.content}</Alert>
+    );
 };
 
 export default Notification;

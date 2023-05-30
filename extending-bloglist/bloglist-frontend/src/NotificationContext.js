@@ -5,7 +5,7 @@ const notificationReducer = (state, action) => {
         case 'ADD':
             return action.payload;
         case 'REMOVE':
-            return '';
+            return { content: '', severity: '' };
         default:
             return state;
     }
@@ -26,7 +26,7 @@ export const useNotificationDispatch = () => {
 export const NotificationContextProvider = ({ children }) => {
     const [notification, notificationDispatch] = useReducer(
         notificationReducer,
-        ''
+        { content: '', severity: '' }
     );
 
     return (

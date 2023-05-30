@@ -4,6 +4,12 @@ import { useQueryClient, useMutation } from 'react-query';
 import { useUserValue } from '../UserContext';
 import { useNotificationDispatch } from '../NotificationContext';
 
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+
 const NewBlogForm = ({ toggleVisibility }) => {
     const [newBlog, setNewBlog] = useState({
         title: '',
@@ -37,73 +43,64 @@ const NewBlogForm = ({ toggleVisibility }) => {
             addBlogMutation.mutate({ blog: newBlog, token: user.token });
             notificationDispatch({
                 type: 'ADD',
-                payload: `A new blog ${newBlog.title} by ${newBlog.author} added`,
+                payload: {
+                    content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
+                    severity: 'success',
+                },
             });
             setNewBlog({ title: '', author: '', url: '' });
             toggleVisibility();
         } catch (exception) {
             notificationDispatch({
                 type: 'ADD',
-                payload: 'Something went wrong... Try again',
+                payload: {
+                    content: 'Something went wrong... Try again',
+                    severity: 'error',
+                },
             });
         }
     };
 
     return (
-        <section>
-            <h2>Create new</h2>
-            <form
-                onSubmit={handleSubmitNewBlog}
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    rowGap: 15,
-                    marginBottom: 30,
-                }}
+        <Box component="section">
+            <Typography
+                component="h2"
+                textAlign="center"
+                fontSize="1.5rem"
+                fontWeight={500}
+                mb="20px"
             >
-                <div>
-                    <label style={{ marginRight: 10 }} htmlFor="title">
-                        Title:
-                    </label>
-                    <input
-                        type="text"
+                Create new Blog
+            </Typography>
+            <form onSubmit={handleSubmitNewBlog}>
+                <Stack spacing={3}>
+                    <TextField
                         name="title"
-                        placeholder="title"
+                        label="Title"
                         id="title"
                         onChange={handleChange}
                         value={newBlog.title}
                     />
-                </div>
-                <div>
-                    <label style={{ marginRight: 10 }} htmlFor="author">
-                        Author:
-                    </label>
-                    <input
-                        type="text"
+                    <TextField
                         name="author"
-                        placeholder="author"
+                        label="Author"
                         id="author"
                         onChange={handleChange}
                         value={newBlog.author}
                     />
-                </div>
-                <div>
-                    <label style={{ marginRight: 10 }} htmlFor="url">
-                        URL:
-                    </label>
-                    <input
-                        type="text"
+                    <TextField
                         name="url"
-                        placeholder="url"
+                        label="url"
                         id="url"
                         onChange={handleChange}
                         value={newBlog.url}
                     />
-                </div>
-                <input type="submit" value="Create" />
+                    <Button variant="contained" type="submit">
+                        Create
+                    </Button>
+                </Stack>
             </form>
-        </section>
+        </Box>
     );
 };
 export default NewBlogForm;

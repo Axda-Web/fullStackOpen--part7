@@ -1,11 +1,24 @@
+import { useState } from 'react';
 import blogService from '../../services/blogs';
 import { useNotificationDispatch } from '../../NotificationContext';
 import { useUserValue } from '../../UserContext';
 import { useQueryClient, useMutation, useQuery } from 'react-query';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
 import CommentsSection from '../../components/CommentsSection';
 
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Stack from '@mui/material/Stack';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+
 const Blog = () => {
+    const [likeBlog, setLikeBlog] = useState(false);
     const notificationDispatch = useNotificationDispatch();
     const user = useUserValue();
     const { blogId } = useParams();
@@ -29,15 +42,20 @@ const Blog = () => {
             );
             notificationDispatch({
                 type: 'ADD',
-                payload: `Blog ${updatedBlog.title} updated`,
+                payload: {
+                    content: `Blog ${updatedBlog.title} updated`,
+                    severity: 'success',
+                },
             });
-            console.log('*** user: ', user);
         },
         onError: (error) => {
             console.log('🚀 ~ file: Blog.jsx:37 ~ Blog ~ error:', error);
             notificationDispatch({
                 type: 'ADD',
-                payload: 'You are not authorized to update this item',
+                payload: {
+                    content: 'You are not authorized to update this item',
+                    severity: 'error',
+                },
             });
         },
     });
@@ -53,7 +71,10 @@ const Blog = () => {
             );
             notificationDispatch({
                 type: 'ADD',
-                payload: `Blog ${currentBlog.title} deleted`,
+                payload: {
+                    content: `Blog ${currentBlog.title} deleted`,
+                    severity: 'success',
+                },
             });
             navigate('/');
         },
@@ -61,7 +82,10 @@ const Blog = () => {
             console.log('🚀 ~ file: Blog.jsx:27 ~ Blog ~ error:', error);
             notificationDispatch({
                 type: 'ADD',
-                payload: 'Something went wrong... Try again',
+                payload: {
+                    content: 'Something went wrong... Try again',
+                    severity: 'error',
+                },
             });
         },
     });
@@ -72,7 +96,7 @@ const Blog = () => {
     const handleLikeClick = async () => {
         const updatedBlog = {
             ...currentBlog,
-            likes: currentBlog.likes + 1,
+            likes: likeBlog ? currentBlog.likes - 1 : currentBlog.likes + 1,
         };
 
         likeBlogMutation.mutate({
@@ -80,6 +104,7 @@ const Blog = () => {
             blog: updatedBlog,
             token: user.token,
         });
+        setLikeBlog((prevState) => !prevState);
     };
 
     const handleBlogDelete = async (blogToRemove) => {
@@ -100,31 +125,84 @@ const Blog = () => {
 
     return (
         <>
-            <div>
-                <h1>{currentBlog.title}</h1>
-                <br />
-                <Link to={currentBlog.url}>{currentBlog.url}</Link>
-                <br />
-                <span id="likes-count">{currentBlog.likes}</span>
-                <button
-                    id="like-button"
-                    style={{ marginLeft: 10 }}
-                    onClick={handleLikeClick}
-                >
-                    like
-                </button>
-                <br />
-                {currentBlog.author}
-                <br />
-                {currentBlog.user.username === user.username && (
-                    <button
-                        id="remove-button"
-                        onClick={() => handleBlogDelete(currentBlog)}
+            <Typography
+                component="h2"
+                fontSize="2rem"
+                fontWeight={700}
+                textAlign="center"
+                py="50px"
+            >
+                Blog
+            </Typography>
+            <Card
+                sx={{
+                    width: 'max-content',
+                    minWidth: '400px',
+                    margin: '0 auto',
+                }}
+            >
+                <CardContent>
+                    <Typography
+                        component="h1"
+                        fontSize="2rem"
+                        fontweight={700}
+                        marginBottom={1}
                     >
-                        Remove
-                    </button>
-                )}
-            </div>
+                        {currentBlog.title}
+                    </Typography>
+                    <Stack direction="row" justifyContent="space-between">
+                        <Typography fontWeight={300}>
+                            By{' '}
+                            <Typography component="span" fontWeight={500}>
+                                {currentBlog.author}
+                            </Typography>
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                            <Typography id="likes-count">
+                                {currentBlog.likes}
+                            </Typography>
+                            {likeBlog ? (
+                                <FavoriteIcon color="info" />
+                            ) : (
+                                <FavoriteBorderIcon color="info" />
+                            )}
+                        </Stack>
+                    </Stack>
+                </CardContent>
+                <CardActions>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        width="100%"
+                    >
+                        <Stack direction="row" spacing={2}>
+                            <Button
+                                variant="contained"
+                                component={RouterLink}
+                                to={currentBlog.url}
+                            >
+                                Read full article
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                id="like-button"
+                                onClick={handleLikeClick}
+                            >
+                                {likeBlog ? 'Dislike' : 'Like'}
+                            </Button>
+                        </Stack>
+                        {currentBlog.user.username === user.username && (
+                            <IconButton
+                                aria-label="delete"
+                                id="remove-button"
+                                onClick={() => handleBlogDelete(currentBlog)}
+                            >
+                                <DeleteOutlineIcon />
+                            </IconButton>
+                        )}
+                    </Stack>
+                </CardActions>
+            </Card>
             <CommentsSection blog={currentBlog} />
         </>
     );
