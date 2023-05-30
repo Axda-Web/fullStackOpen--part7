@@ -1,7 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import userService from '../../services/users';
-import { Link } from 'react-router-dom';
+import BlogCard from '../../components/BlogCard';
+
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 
 const User = () => {
     const { userId } = useParams();
@@ -21,15 +24,28 @@ const User = () => {
 
     return (
         <div>
-            <h1>{user.name}</h1>
-            <h3>Added blogs</h3>
-            <ul>
+            <Typography
+                component="h1"
+                fontSize="2rem"
+                fontWeight={700}
+                textAlign="center"
+                py="50px"
+            >
+                {user.name}
+            </Typography>
+            <Typography
+                component="h2"
+                fontSize="2rem"
+                fontWeight={700}
+                py="50px"
+            >
+                Added blogs
+            </Typography>
+            <Grid container spacing={4}>
                 {blogs.map((blog) => (
-                    <li key={blog.id}>
-                        <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
-                    </li>
+                    <BlogCard key={blog.id} blog={blog} />
                 ))}
-            </ul>
+            </Grid>
         </div>
     );
 };
